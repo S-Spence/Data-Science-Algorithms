@@ -1,5 +1,5 @@
 """
-The bhattacharyya distance measures the similarity of two probability distributions. The bhattachryaa distance can be users for feature ranking and outlier removal.
+The bhattacharyya distance measures the similarity of two probability distributions. The bhattachryaa distance can be used for feature ranking and outlier removal.
 """
 import pandas as pd
 import numpy as np
@@ -38,7 +38,14 @@ def bhattacharyya(data: dict):
     return B
 
 def bhattacharrya_multiclass_feature_ranking(df: object, classes: list, label: str, ranking_method: str):
-    """one vs rest"""
+    """
+    one vs rest feature ranking
+    Ranking Methods: 
+        - min: take the minimum value of each combination
+        - max: take the maximum value of each combination
+        - sum: take the sum of all combinations
+        - avg: take the average of all combinations
+    """
     # get features
     features = list(df.columns)
     features.remove(label)

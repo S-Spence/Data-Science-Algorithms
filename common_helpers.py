@@ -13,7 +13,10 @@ from sklearn.preprocessing import StandardScaler
 from matplotlib.patches import Ellipse
 import matplotlib.transforms as transforms
 
-def confusion_matrix(test_labels, predictions):
+"""
+Evaluation helpers
+"""
+def confusion_matrix(test_labels: list, predictions: list) -> None:
     """Display confusion matrix"""
     test_labels = pd.Series(test_labels, name='Actual')
     y_pred = pd.Series(predictions, name='Predicted')
@@ -21,16 +24,17 @@ def confusion_matrix(test_labels, predictions):
     print("Confusion Matrix:\n")
     print(f"{df_confusion}\n")
     
-def print_accuracy(labels, classifications):
-    correct_pred = 0
-    for i, val in enumerate(classifications):
-        if classifications[i] == labels[i]:
-            correct_pred += 1
-            
-    accuracy = (correct_pred/len(labels))*100;
+def print_accuracy(labels: list, classifications: list) -> None:
+    """
+    Print prediction accuracy
+    """
+    accuracy = get_accuracy(labels, classifications)
     print(f"Accuracy: {round(accuracy, 2)}%")
     
-def get_accuracy(labels, classifications):
+def get_accuracy(labels: list, classifications: list) -> float:
+    """
+    Get prediction accuracy
+    """
     correct_pred = 0
     for i, val in enumerate(classifications):
         if classifications[i] == labels[i]:
@@ -38,13 +42,20 @@ def get_accuracy(labels, classifications):
             
     accuracy = (correct_pred/len(labels))*100;
     return round(accuracy, 2)
-    
-def shuffle_data(df: object) -> object:
-    """Shuffle a dataframe"""
+
+"""
+Data transformation helpers
+"""
+def shuffle_data(df: pd.DataFrame) -> object:
+    """
+    Shuffle a dataframe
+    """
     return df.sample(frac=1).reset_index(drop=True)
 
-def split_by_class(df: object, classes: list, label: str, num_examples=None) -> dict:
-    """Split data by class"""
+def split_by_class(df: pd.DataFrame, classes: list, label: str, num_examples=None) -> dict:
+    """
+    Split data by class
+    """
     split_by_class = {}
     for class_type in classes:
         if num_examples != None:
@@ -54,17 +65,64 @@ def split_by_class(df: object, classes: list, label: str, num_examples=None) -> 
     
     return split_by_class
                
-def reformat_df_by_class(class_data: list):
-    """Add all classes back to the dataframe and randomize"""
+def reformat_df_by_class(class_data: list) -> pd.DataFrame:
+    """
+    Add all classes back to the dataframe and randomize
+    Input:
+        - A list of all class data lists to add back to df
+    """
     df = pd.concat(class_data)
     return df.sample(frac=1).reset_index(drop=True)
 
-# re-encode labels as categorical in dataframe
 def df_labels_to_numerical(df: pd.DataFrame, label: str) -> pd.DataFrame:
+    """
+    re-encode labels as categorical in dataframe
+    """
     df['class_int'] = pd.Categorical(df[label]).codes
     return df
 
-def get_class_combinations(labels: list)->list:
+def split_train_test(data: pd.DataFrame, labels: pd.DataFrame, test_percent: float) -> list:
+    """
+    Split data into training and testing sets
+    """
+    len_data = len(data)
+    split_val = int(len_data - len_data * test_percent)
+    train_data = data.iloc[:split_val, :]
+    test_data = data.iloc[split_val:, :]
+    train_labels = labels.iloc[:split_val]
+    test_labels = labels.iloc[split_val:]
+    
+    return train_data, test_data, train_labels, test_labels
+
+def split_labels(data: pd.DataFrame, label_name: str) -> list:
+    """
+    Split labels and data
+    """
+    labels = data[label_name]
+    new_data = data.drop([label_name], axis=1)
+    return labels, new_data
+
+def stack_columns(array_1: np.array, array_2: np.array) -> np.array:
+    """Stack two numpy arrays column-wise"""
+    # Check if appending to an empty array
+    if len(array_1) == 0:
+        new_data = array_2
+    else:
+        new_data = np.column_stack((array_1, array_2))
+    
+    return new_data
+
+def get_class_indices(data: np.array, labels: list) -> list:
+    """
+    Get the indices for all classes in a numpy array
+    containing class labels
+    """
+    label_indices = {}
+    for label in labels:
+        label_indices[label] = np.where(data == label)[0]
+    return label_indices
+
+def get_class_combinations(labels: list) -> list:
     """Get all combinations of classes in a dataset"""
     combinations = []
     # Collect all combinations of numbers
@@ -74,7 +132,7 @@ def get_class_combinations(labels: list)->list:
                 combinations.append([val_1, val_2])
     return combinations
 
-def get_feature_combinations(features: list) ->list:
+def get_feature_combinations(features: list) -> list:
     """Get all combinations of features"""
     combinations = []
     # Collect all combinations of features
@@ -84,7 +142,10 @@ def get_feature_combinations(features: list) ->list:
                 combinations.append([feature_1, feature_2])
     return combinations
 
-def plot_class_distributions_by_feature(df:object, feature:str, classes: list, colors:dict):
+"""
+Plotting helpers
+"""
+def plot_class_distributions_by_feature(df: pd.DataFrame, feature:str, classes: list, colors:dict) -> None:
     plt.rcParams["figure.figsize"] = [5, 5]
     for class_type in classes:
         class_obs = df[df["species"]==class_type]
@@ -93,28 +154,8 @@ def plot_class_distributions_by_feature(df:object, feature:str, classes: list, c
         plt.title(f"{feature} by class")
         plt.legend(classes)
 
-def split_train_test(data: object, labels: object, test_percent: float):
-    """Split data into training and testing sets"""
-    len_data = len(data)
-    split_val = int(len_data - len(data) * test_percent)
-    train_data = data.iloc[:split_val, :]
-    test_data = data.iloc[split_val:, :]
-    train_labels = labels.iloc[:split_val]
-    test_labels = labels.iloc[split_val:]
-    
-    return train_data, test_data, train_labels, test_labels
 
-def split_labels(data: object, label_name: str) -> list:
-    """
-    Split labels and data
-    """
-    labels = data[label_name]
-    new_data = data.drop([label_name], axis=1)
-    return labels, new_data
-
-"""
-Plot with confidence ellipses
-"""
+# Plot with confidence ellipses
 # Confidence Ellipse code from Python code discussion area: https://matplotlib.org/stable/gallery/statistics/confidence_ellipse.html 
 def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     """
@@ -168,7 +209,7 @@ def confidence_ellipse(x, y, ax, n_std=3.0, facecolor='none', **kwargs):
     ellipse.set_transform(transf + ax.transData)
     return ax.add_patch(ellipse)
 
-def two_feature_ce_visualization(df: object, feature_1: str, feature_2: str, classes, ax):
+def two_feature_ce_visualization(df: pd.DataFrame, feature_1: str, feature_2: str, classes: list, ax: object) -> None:
     """Visualize two features, grouped by class, using the confidence ellipse function above"""
     colors = {"setosa": "red", "versicolor": "blue", "virginica": "orange"}
     
@@ -182,7 +223,7 @@ def two_feature_ce_visualization(df: object, feature_1: str, feature_2: str, cla
     ax.set_ylabel(feature_2)
     ax.legend()
 
-def plot_feature_combinations(data: object, feature_permutations: list, labels: list):
+def plot_feature_combinations(data: pd.DataFrame, feature_permutations: list, labels: list) -> None:
     """Create subplots to plot all feature combinations"""
     rows, cols = 3, 2
     fig, ax = plt.subplots(rows, cols, figsize=(10, 10))
@@ -196,7 +237,7 @@ def plot_feature_combinations(data: object, feature_permutations: list, labels: 
     plt.tight_layout()                     
     plt.show()
     
-def plot_clusters(data, clusters, colors):
+def plot_clusters(data: pd.DataFrame, clusters: list, colors: list) -> None:
     if len(clusters) > len(colors):
         print("The colors list should have a color for each cluster")
         return
@@ -206,25 +247,6 @@ def plot_clusters(data, clusters, colors):
         values = data[data.index.isin(clusters[i])]
         plt.plot(values.iloc[:, 1], values.iloc[:, 2], colors[i])
 
-def stack_columns(array_1: object, array_2: object):
-    """Stack two numpy arrays column-wise"""
-    # Check if appending to an empty array
-    if len(array_1) == 0:
-        new_data = array_2
-    else:
-        new_data = np.column_stack((array_1, array_2))
-    
-    return new_data
-
-def get_class_indices(data, labels):
-    """
-    Get the indices for all classes in a numpy array
-    containing class labels
-    """
-    label_indices = {}
-    for label in labels:
-        label_indices[label] = np.where(data == label)[0]
-    return label_indices
 
 """
 Helpers for image data
@@ -235,7 +257,7 @@ def reshape_image(image, dimesions):
     """
     return np.reshape(image, dimesions)
 
-def plot_sample_images(data: np.array, indices: list):
+def plot_sample_images(data: np.array, indices: list) -> None:
     """Function to plot the sample images at the given indices"""
 
     # Set the image size
@@ -274,7 +296,7 @@ def plot_two_principal_components(two_component_pca, labels, classes, colors):
     ax.legend(classes)
     ax.grid()
     
-def pca_variance_and_scree_analysis(data: object, components: int):
+def pca_variance_and_scree_analysis(data: np.array, components: int) -> list:
     """Analyze the data with principal component analysis"""
     pca = PCA(n_components=4)
     pca_model = pca.fit(data)

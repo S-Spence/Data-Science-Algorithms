@@ -13,8 +13,10 @@ def get_2d_dct_both_axes(data):
 
     return np.array(dct_array)
 
-# Element-wise multiplication with the masks to obtain the directional coefficients of the dcts
 def get_directional_coefficients(dct_transforms, vertical_mask, diagonal_mask, horizontal_mask):
+    """
+    Element-wise multiplication with the masks to obtain the directional coefficients of the dcts
+    """
     vertical_coeffs = np.array([np.multiply(image, vertical_mask) for image in dct_transforms])
     horizontal_coeffs = np.array([np.multiply(image, horizontal_mask) for image in dct_transforms])
     diagonal_coeffs = np.array([np.multiply(image, diagonal_mask) for image in dct_transforms])
@@ -30,6 +32,9 @@ def flatten_and_get_non_zeros(data: object):
     return np.array(flattened_data).T
 
 def explained_variance_ratios(eigvals):
+    """
+    Return explained variance ratios
+    """
     explained_variance_ratios = []
     total = sum(eigvals)
     for i in range(len(eigvals)):
