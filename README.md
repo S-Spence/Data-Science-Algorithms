@@ -31,7 +31,6 @@ This repository contains various Machine Learning, Computational Statistics, and
     - MiniMax Algorithm (game theory)
     
 ### TODO:
-- Refactor Spence_HW3.ipynb and Spence_HW4.ipynb to use the abstracted functions in the algorithm files.
 - Add more detailed descriptions about the algorithms to the README and the algorithm files.
 - Add more tests
 
