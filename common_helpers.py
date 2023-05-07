@@ -59,6 +59,11 @@ def reformat_df_by_class(class_data: list):
     df = pd.concat(class_data)
     return df.sample(frac=1).reset_index(drop=True)
 
+# re-encode labels as categorical in dataframe
+def df_labels_to_numerical(df: pd.DataFrame, label: str) -> pd.DataFrame:
+    df['class_int'] = pd.Categorical(df[label]).codes
+    return df
+
 def get_class_combinations(labels: list)->list:
     """Get all combinations of classes in a dataset"""
     combinations = []

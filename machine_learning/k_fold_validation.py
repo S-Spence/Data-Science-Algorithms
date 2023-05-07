@@ -1,6 +1,7 @@
 """
 K-fold Cross Validation
 """
+import pandas as pd
 import common_helpers as common
 
 def get_folds(num_data: int, num_folds: int) -> dict:
@@ -26,7 +27,7 @@ def get_folds(num_data: int, num_folds: int) -> dict:
     
     return k_folds
 
-def k_fold_validation(df: object, num_folds: int):
+def k_fold_validation(df: pd.DataFrame, num_folds: int) -> dict:
     """Get the test and training sets to perform k-fold cross validation"""
     # Get the shape of the data
     num_data = df.shape[0]
@@ -43,3 +44,19 @@ def k_fold_validation(df: object, num_folds: int):
         experiment_data[experiment]["train"] = df.drop(experiments[experiment], axis=0)
         
     return experiment_data
+
+# Create a set to determine if all indices were used once in the test sets
+def validate_k_fold_algorithm(experiments: dict, df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Create a set to determine if all indices were used once in the testing sets for the n experiments
+    Inputs:
+        - experiments: The dictionary containing the k sample dfs
+        - df: The original dataset
+    """
+    check_all_indices = set()
+    for experiment in experiments:
+        indices = experiments[experiment]['test'].index
+        [check_all_indices.add(i) for i in indices]
+    
+    print(f"The set containing all test set values should contain {df.shape[0]} observations if the k-fold algorithm worked as expected.\n")
+    print(f"The set containing all test set values contains {len(check_all_indices)} examples.\n")
